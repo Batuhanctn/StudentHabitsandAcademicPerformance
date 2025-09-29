@@ -169,7 +169,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 **Batuhan Cetin**
 - GitHub: [@Batuhanctn](https://github.com/Batuhanctn)
-- LinkedIn: [Connect with me](https://linkedin.com/in/yourprofile)
+- LinkedIn: [Connect with me](https://www.linkedin.com/in/batuhan-çetin-963155266/)
 
 ## 🙏 Acknowledgments
 
