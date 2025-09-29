@@ -145,7 +145,7 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-*.pkl
+# *.pkl  # Commented out to include trained model
 model_checkpoints/
 logs/
 data/raw/
