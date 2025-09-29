@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğrenci Alışkanlıkları ve Akademik Performans Tahmini</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .form-group:hover {
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .help-text {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f0f9ff;
+            border-radius: 15px;
+            border-left: 5px solid #0ea5e9;
+            display: none;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Akademik Performans Tahmini</h1>
+            <p>Alışkanlıklarınıza göre akademik performansınızı tahmin edin</p>
+        </div>
+
+        <div class="content">
+            <form id="predictionForm">
+                <div class="form-grid">
+                    <!-- Demografik Bilgiler -->
+                    <div class="form-group">
+                        <label for="age">
+                            <span class="icon">👤</span>Yaş
+                        </label>
+                        <input type="number" id="age" name="age" min="16" max="30" required>
+                        <div class="help-text">Yaşınızı girin (16-30 arası)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">
+                            <span class="icon">⚧</span>Cinsiyet
+                        </label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="Male">Erkek</option>
+                            <option value="Female">Kadın</option>
+                        </select>
+                        <div class="help-text">Cinsiyetinizi seçin</div>
+                    </div>
+
+                    <!-- Çalışma Alışkanlıkları -->
+                    <div class="form-group">
+                        <label for="study_hours_per_day">
+                            <span class="icon">📚</span>Günlük Çalışma Saati
+                        </label>
+                        <input type="number" id="study_hours_per_day" name="study_hours_per_day" 
+                               min="0" max="16" step="0.1" required>
+                        <div class="help-text">Günde ortalama kaç saat ders çalışıyorsunuz? (0-16 saat)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="attendance_percentage">
+                            <span class="icon">🏫</span>Devam Yüzdesi
+                        </label>
+                        <input type="number" id="attendance_percentage" name="attendance_percentage" 
+                               min="0" max="100" step="0.1" required>
+                        <div class="help-text">Derslere devam yüzdenizi girin (0-100%)</div>
+                    </div>
+
+                    <!-- Dijital Alışkanlıklar -->
+                    <div class="form-group">
+                        <label for="social_media_hours">
+                            <span class="icon">📱</span>Günlük Sosyal Medya Saati
+                        </label>
+                        <input type="number" id="social_media_hours" name="social_media_hours" 
+                               min="0" max="16" step="0.1" required>
+                        <div class="help-text">Günde kaç saat sosyal medya kullanıyorsunuz?</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="netflix_hours">
+                            <span class="icon">📺</span>Günlük Netflix/Dizi Saati
+                        </label>
+                        <input type="number" id="netflix_hours" name="netflix_hours" 
+                               min="0" max="12" step="0.1" required>
+                        <div class="help-text">Günde kaç saat dizi/film izliyorsunuz?</div>
+                    </div>
+
+                    <!-- Yaşam Tarzı -->
+                    <div class="form-group">
+                        <label for="sleep_hours">
+                            <span class="icon">😴</span>Günlük Uyku Saati
+                        </label>
+                        <input type="number" id="sleep_hours" name="sleep_hours" 
+                               min="4" max="12" step="0.1" required>
+                        <div class="help-text">Günde ortalama kaç saat uyuyorsunuz? (4-12 saat)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exercise_frequency">
+                            <span class="icon">🏃</span>Haftalık Egzersiz Sıklığı
+                        </label>
+                        <input type="number" id="exercise_frequency" name="exercise_frequency" 
+                               min="0" max="7" required>
+                        <div class="help-text">Haftada kaç gün egzersiz yapıyorsunuz? (0-7 gün)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="diet_quality">
+                            <span class="icon">🍎</span>Beslenme Kalitesi
+                        </label>
+                        <select id="diet_quality" name="diet_quality" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="Poor">Kötü</option>
+                            <option value="Average">Orta</option>
+                            <option value="Good">İyi</option>
+                        </select>
+                        <div class="help-text">Beslenme alışkanlıklarınızı nasıl değerlendiriyorsunuz? (3 seviye)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mental_health_rating">
+                            <span class="icon">🧠</span>Mental Sağlık Puanı
+                        </label>
+                        <input type="number" id="mental_health_rating" name="mental_health_rating" 
+                               min="1" max="10" required>
+                        <div class="help-text">Mental sağlığınızı 1-10 arası nasıl değerlendiriyorsunuz?</div>
+                    </div>
+
+                    <!-- İş ve Sosyal Aktiviteler -->
+                    <div class="form-group">
+                        <label for="part_time_job">
+                            <span class="icon">💼</span>Yarı Zamanlı İş
+                        </label>
+                        <select id="part_time_job" name="part_time_job" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="Yes">Evet, çalışıyorum</option>
+                            <option value="No">Hayır, çalışmıyorum</option>
+                        </select>
+                        <div class="help-text">Okul dışında herhangi bir işte çalışıyor musunuz?</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="extracurricular_participation">
+                            <span class="icon">🎯</span>Ders Dışı Aktiviteler
+                        </label>
+                        <select id="extracurricular_participation" name="extracurricular_participation" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="Yes">Evet, katılıyorum</option>
+                            <option value="No">Hayır, katılmıyorum</option>
+                        </select>
+                        <div class="help-text">Kulüp, spor takımı gibi ders dışı aktivitelere katılıyor musunuz?</div>
+                    </div>
+
+                    <!-- Aile ve Çevre -->
+                    <div class="form-group">
+                        <label for="parental_education_level">
+                            <span class="icon">🎓</span>Ebeveyn Eğitim Seviyesi
+                        </label>
+                        <select id="parental_education_level" name="parental_education_level" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="Low">Düşük (İlkokul/Ortaokul)</option>
+                            <option value="Medium">Orta (Lise)</option>
+                            <option value="High">Yüksek (Üniversite+)</option>
+                        </select>
+                        <div class="help-text">Anne veya babanızın en yüksek eğitim seviyesi nedir? (3 seviye)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="internet_quality">
+                            <span class="icon">🌐</span>İnternet Kalitesi
+                        </label>
+                        <select id="internet_quality" name="internet_quality" required>
+                            <option value="">Seçiniz...</option>
+                            <option value="Poor">Kötü</option>
+                            <option value="Average">Orta</option>
+                            <option value="Good">İyi</option>
+                        </select>
+                        <div class="help-text">Evinizdeki internet bağlantısının kalitesi nasıl? (3 seviye)</div>
+                    </div>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn">
+                        🔮 Akademik Performansımı Tahmin Et
+                    </button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Verileriniz analiz ediliyor...</p>
+                </div>
+
+                <div class="result-section" id="result">
+                    <h3>📊 Tahmin Sonucu</h3>
+                    <p id="predictionResult"></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('result').classList.remove('show');
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                // Convert numeric values
+                if (['age', 'exercise_frequency', 'mental_health_rating'].includes(key)) {
+                    data[key] = parseInt(value);
+                } else if (['study_hours_per_day', 'social_media_hours', 'netflix_hours', 
+                          'attendance_percentage', 'sleep_hours'].includes(key)) {
+                    data[key] = parseFloat(value);
+                } else if (key === 'diet_quality') {
+                    // Map to exact database values: ['Fair', 'Good', 'Poor']
+                    console.log('Diet quality received value:', value);
+                    if (value === 'Poor') {
+                        data[key] = 'Poor';
+                        console.log('Mapped to: Poor');
+                    } else if (value === 'Average') {
+                        data[key] = 'Fair';
+                        console.log('Mapped to: Fair');
+                    } else if (value === 'Good') {
+                        data[key] = 'Good';
+                        console.log('Mapped to: Good');
+                    } else {
+                        console.error('Unknown diet quality value:', value);
+                        data[key] = value; // Fallback
+                    }
+                } else if (key === 'parental_education_level') {
+                    // Map to exact database values: ['Master', 'High School', 'Bachelor']
+                    if (value === 'Low') data[key] = 'High School';
+                    else if (value === 'Medium') data[key] = 'Bachelor';
+                    else if (value === 'High') data[key] = 'Master';
+                } else if (key === 'internet_quality') {
+                    // Map to exact database values: ['Average', 'Poor', 'Good']
+                    if (value === 'Poor') data[key] = 'Poor';
+                    else if (value === 'Average') data[key] = 'Average';
+                    else if (value === 'Good') data[key] = 'Good';
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Debug: Log the data being sent
+            console.log('Data being sent to backend:', data);
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Backend error response:', errorText);
+                    throw new Error(`Backend error: ${response.status} - ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Success result:', result);
+                
+                // Hide loading
+                document.getElementById('loading').classList.remove('show');
+                
+                // Show result - limit prediction to maximum 100
+                let prediction = result.prediction;
+                if (prediction > 100) {
+                    prediction = 100;
+                    console.log('Prediction capped at 100, original was:', result.prediction);
+                }
+                let resultText = '';
+                let emoji = '';
+                
+                if (prediction >= 85) {
+                    emoji = '🌟';
+                    resultText = `Harika! Tahmin edilen akademik performansınız: <strong>${prediction.toFixed(2)}</strong><br>
+                                  Bu mükemmel bir sonuç! Alışkanlıklarınız akademik başarı için oldukça uygun.`;
+                } else if (prediction >= 70) {
+                    emoji = '👍';
+                    resultText = `İyi! Tahmin edilen akademik performansınız: <strong>${prediction.toFixed(2)}</strong><br>
+                                  Başarılı bir sonuç! Bazı alışkanlıklarınızı geliştirerek daha da iyileştirebilirsiniz.`;
+                } else if (prediction >= 55) {
+                    emoji = '⚠️';
+                    resultText = `Orta. Tahmin edilen akademik performansınız: <strong>${prediction.toFixed(2)}</strong><br>
+                                  Alışkanlıklarınızda bazı iyileştirmeler yaparak performansınızı artırabilirsiniz.`;
+                } else {
+                    emoji = '📈';
+                    resultText = `Gelişim fırsatı. Tahmin edilen akademik performansınız: <strong>${prediction.toFixed(2)}</strong><br>
+                                  Çalışma, uyku ve yaşam tarzı alışkanlıklarınızı gözden geçirerek büyük ilerlemeler kaydedebilirsiniz.`;
+                }
+                
+                document.getElementById('predictionResult').innerHTML = emoji + ' ' + resultText;
+                document.getElementById('result').classList.add('show');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                console.error('Full error details:', error.message);
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('predictionResult').innerHTML = `❌ Bir hata oluştu: ${error.message}<br>Konsolu kontrol edin.`;
+                document.getElementById('result').classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>
